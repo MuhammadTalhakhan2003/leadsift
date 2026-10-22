@@ -76,14 +76,16 @@ export function parseCsvInput(text: string): { raw: string; name?: string }[] {
   const domainCol = fields.find((f) => /website|domain|url|site/i.test(f));
   const nameCol = fields.find((f) => /company|business|name|organization/i.test(f) && f !== domainCol);
   if (domainCol) {
-    return parsed.data
+    const rows = parsed.data
       .map((row) => ({ raw: row[domainCol] ?? "", name: nameCol ? row[nameCol] : undefined }))
       .filter((r) => r.raw);
+    if (rows.length) return rows;
   }
-  // No header we recognise: treat every cell that looks like a domain as one.
+  // No header we recognise, or a malformed file (e.g. an unclosed quote swallowed
+  // every row): treat every cell that looks like a domain as one.
   return text
     .split(/[\n,;\t]+/)
-    .map((s) => s.trim())
+    .map((s) => s.trim().replace(/^"+|"+$/g, ""))
     .filter((s) => /\.[a-z]{2,}/i.test(s))
     .map((raw) => ({ raw }));
 }

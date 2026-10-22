@@ -55,6 +55,11 @@ export default function Home() {
 
   const handleCsv = async (file: File) => {
     const rows = parseCsvInput(await file.text());
+    if (rows.length === 0) {
+      setCsvRows(null);
+      setCsvLabel(`${file.name}: no websites found. Check that it has a Website/Domain/URL column.`);
+      return;
+    }
     setCsvRows(rows);
     setCsvLabel(`${file.name}: ${rows.length} rows`);
     setInput(rows.map((r) => (r.name ? `${r.raw}, ${r.name}` : r.raw)).join("\n"));
